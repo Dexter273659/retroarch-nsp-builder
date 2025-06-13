@@ -14,42 +14,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout your repo (with RetroArch.nro + icon)
+      # 1. Check out your repo (with the .nro + icon)
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2. Set up Python 3.x
-      - name: Set up Python
+      # 2. Set up Python
+      - name: Set up Python 3.x
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # 3. Install the packaging libraries
-      - name: Install pyctr & pfs
-        run: pip install pyctr pfs
+      # 3. Install the NTON forwarder tool
+      - name: Install NTON
+        run: pip install nton
 
-      # 4. Pull in the Nro2Nsp tool from Root-MtX
-      - name: Checkout Nro2Nsp
-        uses: actions/checkout@v4
-        with:
-          repository: Root-MtX/Nro2Nsp
-          ref: master
-          path: nro2nsp
-
-      # 5. Build the NSP
+      # 4. Build the NSP from your NRO
       - name: Build NSP
-        run: |
-          python nro2nsp/nro2nsp.py \
-            --nro ./RetroArch.nro \
-            --icon ./retroarch_icon.png \
-            --titleid 0100000000001000 \
-            --name "RetroArch" \
-            --version "1.0.0" \
-            --out ./RetroArch.nsp
+        run: nton build "./RetroArch.nro"
 
-      # 6. Upload the resulting NSP
+      # 5. Upload the resulting .nsp
       - name: Upload NSP artifact
         uses: actions/upload-artifact@v4
         with:
           name: RetroArch.nsp
-          path: ./RetroArch.nsp
+          path: '*.nsp'
