@@ -1,9 +1,14 @@
 name: Build RetroArch NSP
+
 on:
   push:
+    branches:
+      - main          # only run on pushes to main
     paths:
       - 'RetroArch.nro'
       - 'retroarch_icon.png'
+      - '.github/workflows/build-nsp.yml'
+
 jobs:
   build:
     runs-on: ubuntu-latest
