@@ -3,7 +3,7 @@ name: Build RetroArch NSP
 on:
   push:
     branches:
-      - main          # only run on pushes to main
+      - main
     paths:
       - 'RetroArch.nro'
       - 'retroarch_icon.png'
@@ -12,21 +12,43 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt update && sudo apt install -y python3-pip
-      - run: pip3 install pyctr pfs
-      - run: |
-          git clone https://github.com/switch-tools/nro2nsp.git
-          cd nro2nsp
-          python3 nro2nsp.py \
-            --nro ../RetroArch.nro \
-            --icon ../retroarch_icon.png \
+      # 1. Checkout your repo (with the .nro and icon)
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      # 2. Set up Python 3.x
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3. Install pyctr & pfs for NSP packaging
+      - name: Install dependencies
+        run: pip install pyctr pfs
+
+      # 4. Checkout the nro2nsp tool into ./nro2nsp
+      - name: Checkout nro2nsp tool
+        uses: actions/checkout@v3
+        with:
+          repository: switch-tools/nro2nsp
+          path: nro2nsp
+
+      # 5. Run the builder script
+      - name: Build NSP
+        run: |
+          python3 nro2nsp/nro2nsp.py \
+            --nro ./RetroArch.nro \
+            --icon ./retroarch_icon.png \
             --titleid 0100000000001000 \
             --name "RetroArch" \
             --version "1.0.0" \
-            --out RetroArch.nsp
-      - uses: actions/upload-artifact@v4
+            --out ./RetroArch.nsp
+
+      # 6. Upload the resulting NSP
+      - name: Upload NSP artifact
+        uses: actions/upload-artifact@v4
         with:
           name: RetroArch.nsp
-          path: nro2nsp/RetroArch.nsp
+          path: ./RetroArch.nsp
