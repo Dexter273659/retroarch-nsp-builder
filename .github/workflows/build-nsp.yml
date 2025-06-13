@@ -1,0 +1,27 @@
+name: Build RetroArch NSP
+on:
+  push:
+    paths:
+      - 'RetroArch.nro'
+      - 'retroarch_icon.png'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt update && sudo apt install -y python3-pip
+      - run: pip3 install pyctr pfs
+      - run: |
+          git clone https://github.com/switch-tools/nro2nsp.git
+          cd nro2nsp
+          python3 nro2nsp.py \
+            --nro ../RetroArch.nro \
+            --icon ../retroarch_icon.png \
+            --titleid 0100000000001000 \
+            --name "RetroArch" \
+            --version "1.0.0" \
+            --out RetroArch.nsp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RetroArch.nsp
+          path: nro2nsp/RetroArch.nsp
